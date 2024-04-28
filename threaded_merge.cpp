@@ -1,7 +1,8 @@
 #include "threaded_merge.hpp"
 
 int main() {
-  int max_threads, array_size;
+  int max_threads;
+  long int array_size;
   std::cout << "Input max threads" << std::endl;
   std::cin >> max_threads;
   std::cout << "Enter array size to sort" << std::endl;
@@ -16,17 +17,14 @@ int main() {
   for(int i=0; i<array_size; i++) {
     arr[i] = rand() % array_size;
   }
-  for (int i = 0; i<array_size; i++) {
-    std::cout << arr[i] << " ";
-  }
-  std::cout << "unsorted" << std::endl;
 
-  mergeSort(arr, array_size);
+  auto start = std::chrono::high_resolution_clock::now();
+  mergeSort(arr, array_size, max_threads);
+  auto stop = std::chrono::high_resolution_clock::now();
+  
+  auto runtime = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 
-  for (int i = 0; i<array_size; i++) {
-    std::cout << arr[i] << " ";
-  }
-  std::cout << "sorted" << std::endl;
+  std::cout << "Execution time: " << runtime.count() << " microseconds" << std::endl; 
 
   //Delete the allocated array and exit
   delete[] arr;

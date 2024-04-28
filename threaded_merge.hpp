@@ -4,9 +4,14 @@
 #include <chrono>
 #include <random>
 
+//Globals for thread management
+int maxThreads = 0;
+int currNumThreads = 0;
+
 //Function declarations
-void merge(int arrA[], int sizeA, int arrB[], int sizeB, int arrC[], int sizeC);
-void mergeSort(int arr[], int size);
+void mergeSortAUX(int arr[], int size);
+void merge(int arrA[], int sizeA, int arrB[], int sizeB, int arrC[], int sizeC, int num_threads);
+void mergeSort(int arr[], int size, int numThreads);
 
 //Function definitions below
 void merge(int arrA[], int sizeA, int arrB[], int sizeB, int arrC[], int sizeC) {
@@ -41,17 +46,20 @@ void merge(int arrA[], int sizeA, int arrB[], int sizeB, int arrC[], int sizeC) 
 
 }
 
-void mergeSort(int arr[], int size) {
+void mergeSortAUX(int arr[], int size) {
   int sizeB;
   if (size < 2) {
     return;
   }
+
+  //Calculate size of B
   if ((size%2) == 0) {
     sizeB = size/2;
   }
   else {
     sizeB = (size/2)+1;
   }
+
   //Intitialize arrays for the two halves
   int* arrA = new int[size/2];
   int* arrB = new int[sizeB];
@@ -65,13 +73,28 @@ void mergeSort(int arr[], int size) {
     arrB[i] = arr[k];
     k++;
   }
-  
 
-  //Recursively sort and merge the arrays
-  mergeSort(arrA, size/2);
-  mergeSort(arrB, sizeB);
-  merge(arrA, size/2, arrB, sizeB, arr, size);
+  //Recursively sort and merge the arrays, have a new thread handle the right side of the array.
+  if(currNumThreads < maxThreads) {
+    currNumThreads += 1;
+    std::thread thread(mergeSortAUX, arrB, sizeB);
+    mergeSortAUX(arrA, size/2);
+    thread.join();
+    currNumThreads -= 1;
+    merge(arrA, size/2, arrB, sizeB, arr, size);
+  }
+  else {
+    mergeSortAUX(arrA, size/2);
+    mergeSortAUX(arrB, sizeB);
+    merge(arrA, size/2, arrB, sizeB, arr, size);
+  }
 
+  delete[] arrA;
+  delete[] arrB;
   return;
+}
 
+void mergeSort(int arr[], int size, int numThreads) {
+  maxThreads = numThreads;
+  mergeSortAUX(arr, size);
 }
