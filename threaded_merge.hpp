@@ -4,6 +4,10 @@
 #include <chrono>
 #include <random>
 
+//Authored by TheMoonBass
+//Threaded MergeSort, working as intended
+//Note: Runs slower for the first run after being built in VSCode
+
 //Globals for thread management
 int maxThreads = 0;
 int currNumThreads = 0;
